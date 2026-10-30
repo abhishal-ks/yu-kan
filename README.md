@@ -34,6 +34,7 @@ Visit [http://localhost:3000](http://localhost:3000), sign in with Google, and c
 
 - `GET /api/auth/login` starts the Google OAuth flow with a CSRF-protected state value.
 - `GET /api/auth/callback` exchanges the authorization code and stores OAuth tokens.
+- `GET /api/auth/channel` returns the signed-in YouTube channel name and profile image without exposing OAuth tokens to the browser.
 - `POST /api/analyze` retrieves 10 recent uploads, merges 90-day video-level views, watch time, retention, subscriber gains, likes, comments, and shares, then returns Gemini insights and script recommendations.
 - `POST /api/auth/logout` clears the local OAuth cookies.
 

@@ -1,7 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Video = {
   videoId: string;
@@ -39,6 +40,22 @@ type DashboardProps = {
   authenticated: boolean;
   authError?: string;
 };
+
+type ChannelProfile = {
+  title: string | null;
+  thumbnailUrl: string | null;
+};
+
+function isChannelProfile(value: unknown): value is ChannelProfile {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "title" in value &&
+    (typeof value.title === "string" || value.title === null) &&
+    "thumbnailUrl" in value &&
+    (typeof value.thumbnailUrl === "string" || value.thumbnailUrl === null)
+  );
+}
 
 function isAnalysisResult(value: unknown): value is AnalysisResult {
   if (
@@ -150,6 +167,65 @@ export default function Dashboard({ authenticated, authError }: DashboardProps) 
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [channelProfile, setChannelProfile] = useState<ChannelProfile | null>(
+    null,
+  );
+  const [channelProfileLoading, setChannelProfileLoading] =
+    useState(authenticated);
+  const [channelProfileError, setChannelProfileError] = useState<string | null>(
+    null,
+  );
+
+  useEffect(() => {
+    if (!authenticated) return;
+
+    const controller = new AbortController();
+
+    async function loadChannelProfile() {
+      try {
+        const response = await fetch("/api/auth/channel", {
+          signal: controller.signal,
+        });
+        const body: unknown = await response.json();
+
+        if (!response.ok) {
+          const message =
+            typeof body === "object" &&
+              body !== null &&
+              "error" in body &&
+              typeof body.error === "string"
+              ? body.error
+              : "We couldn't load your YouTube channel details.";
+          throw new Error(message);
+        }
+
+        if (
+          typeof body !== "object" ||
+          body === null ||
+          !("channel" in body) ||
+          !isChannelProfile(body.channel)
+        ) {
+          throw new Error("The channel profile response was invalid.");
+        }
+
+        setChannelProfile(body.channel);
+      } catch (caughtError) {
+        if (controller.signal.aborted) return;
+        setChannelProfileError(
+          caughtError instanceof Error
+            ? caughtError.message
+            : "We couldn't load your YouTube channel details.",
+        );
+      } finally {
+        if (!controller.signal.aborted) {
+          setChannelProfileLoading(false);
+        }
+      }
+    }
+
+    void loadChannelProfile();
+    return () => controller.abort();
+  }, [authenticated]);
 
   async function analyzeChannel() {
     setLoading(true);
@@ -162,9 +238,9 @@ export default function Dashboard({ authenticated, authError }: DashboardProps) 
       if (!response.ok) {
         const message =
           typeof body === "object" &&
-          body !== null &&
-          "error" in body &&
-          typeof body.error === "string"
+            body !== null &&
+            "error" in body &&
+            typeof body.error === "string"
             ? body.error
             : "Analysis failed. Please try again.";
         throw new Error(message);
@@ -205,14 +281,51 @@ export default function Dashboard({ authenticated, authError }: DashboardProps) 
           Your channel, with a clearer perspective.
         </span>
         {authenticated && (
-          <form action="/api/auth/logout" method="post">
-            <button
-              type="submit"
-              className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
-            >
-              Disconnect
-            </button>
-          </form>
+          <div className="flex items-center gap-3">
+            {channelProfileLoading && (
+              <span
+                aria-live="polite"
+                className="hidden text-sm text-slate-500 sm:block"
+              >
+                Loading channel…
+              </span>
+            )}
+            {channelProfile && (
+              <div className="flex min-w-0 items-center gap-2">
+                {channelProfile.thumbnailUrl ? (
+                  <Image
+                    src={channelProfile.thumbnailUrl}
+                    alt=""
+                    width={36}
+                    height={36}
+                    unoptimized
+                    className="size-9 shrink-0 rounded-full object-cover"
+                  />
+                ) : (
+                  <span
+                    aria-hidden="true"
+                    className="grid size-9 shrink-0 place-items-center rounded-full bg-red-50 text-sm font-semibold text-red-700"
+                  >
+                    {(channelProfile.title ?? "Y").charAt(0).toUpperCase()}
+                  </span>
+                )}
+                <span
+                  className="max-w-36 truncate text-sm font-medium text-slate-700"
+                  title={channelProfile.title ?? "YouTube channel"}
+                >
+                  {channelProfile.title ?? "YouTube channel"}
+                </span>
+              </div>
+            )}
+            <form action="/api/auth/logout" method="post">
+              <button
+                type="submit"
+                className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
+              >
+                Disconnect
+              </button>
+            </form>
+          </div>
         )}
       </header>
 
@@ -238,6 +351,26 @@ export default function Dashboard({ authenticated, authError }: DashboardProps) 
             >
               {authErrorMessages[authError] ??
                 "There was a problem connecting your account. Please try again."}
+            </p>
+          )}
+
+          {channelProfileError && authenticated && (
+            <p
+              role="alert"
+              className="mt-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+            >
+              {channelProfileError}
+              {channelProfileError.toLowerCase().includes("sign in again") && (
+                <>
+                  {" "}
+                  <a
+                    className="font-semibold underline underline-offset-2"
+                    href="/api/auth/login"
+                  >
+                    Reconnect Google
+                  </a>
+                </>
+              )}
             </p>
           )}
 
