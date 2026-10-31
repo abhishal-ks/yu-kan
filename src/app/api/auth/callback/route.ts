@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
       throw new Error("Google did not return an access token.");
     }
 
-    const response = NextResponse.redirect(callbackUrl);
+    const response = NextResponse.redirect(new URL("/dashboard", request.url));
     response.cookies.set(
       ACCESS_TOKEN_COOKIE,
       tokens.access_token,

@@ -1,10 +1,10 @@
 import { Suspense } from "react";
 import { cookies } from "next/headers";
-import Dashboard from "./dashboard";
 import {
   ACCESS_TOKEN_COOKIE,
   REFRESH_TOKEN_COOKIE,
 } from "@/lib/google-oauth";
+import LandingPage from "@/features/landing/landing-page";
 
 type HomeProps = {
   searchParams: Promise<{ authError?: string }>;
@@ -22,19 +22,19 @@ export default function Home({ searchParams }: HomeProps) {
         </main>
       }
     >
-      <AuthenticatedDashboard searchParams={searchParams} />
+      <LandingContent searchParams={searchParams} />
     </Suspense>
   );
 }
 
-async function AuthenticatedDashboard({ searchParams }: HomeProps) {
+async function LandingContent({ searchParams }: HomeProps) {
   const [cookieStore, params] = await Promise.all([cookies(), searchParams]);
   const authenticated = Boolean(
     cookieStore.get(ACCESS_TOKEN_COOKIE)?.value ||
-      cookieStore.get(REFRESH_TOKEN_COOKIE)?.value,
+    cookieStore.get(REFRESH_TOKEN_COOKIE)?.value,
   );
 
   return (
-    <Dashboard authenticated={authenticated} authError={params.authError} />
+    <LandingPage authenticated={authenticated} authError={params.authError} />
   );
 }

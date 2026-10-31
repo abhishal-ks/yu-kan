@@ -51,7 +51,7 @@ Never expose these values through `NEXT_PUBLIC_` variables or commit `.env.local
 npm run dev
 ```
 
-Visit [http://localhost:3000](http://localhost:3000), sign in with Google, and choose **Analyze My Channel**. The access and refresh tokens are stored in HTTP-only, same-site cookies and are never sent to client-side JavaScript. If you connected before the YouTube Analytics scope was added, disconnect and sign in again to grant it.
+Visit [http://localhost:3000](http://localhost:3000) and sign in with Google. After connecting, ViewPulse opens the channel workspace at `/dashboard`; run an analysis there to see the report and ask questions grounded in its analytics. The access and refresh tokens are stored in HTTP-only, same-site cookies and are never sent to client-side JavaScript. If you connected before the YouTube Analytics scope was added, disconnect and sign in again to grant it.
 
 ## API
 
