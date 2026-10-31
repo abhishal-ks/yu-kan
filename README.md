@@ -2,6 +2,27 @@
 
 ViewPulse connects a YouTube channel with read-only Google OAuth access, retrieves its 10 most recent uploads and their last 90 days of video-level analytics, and generates a performance breakdown with Gemini.
 
+## Design and architecture
+
+The browser renders the dashboard and makes same-origin requests to Next.js API routes. OAuth tokens remain in HTTP-only cookies; the server uses them to fetch YouTube data and calls Gemini for analysis and answers.
+
+```mermaid
+flowchart TD
+    User[Creator] --> UI[Next.js dashboard]
+    UI -->|Sign in| Login[OAuth login and callback routes]
+    Login <--> GoogleOAuth[Google OAuth]
+    Login -->|HTTP-only token cookies| UI
+    UI -->|Channel profile| ChannelAPI[Channel API route]
+    UI -->|Analyze or ask| DataAPI[Analysis and question API routes]
+    ChannelAPI --> OAuth[Shared OAuth helpers]
+    DataAPI --> OAuth
+    OAuth -->|Authenticated requests| YouTube[YouTube Data and Analytics APIs]
+    DataAPI -->|Prompt with analytics| Gemini[Gemini API]
+    ChannelAPI -->|Profile response| UI
+    DataAPI -->|Insights or answer| UI
+    UI -->|Render results| User
+```
+
 ## Configure Google and Gemini
 
 Create OAuth 2.0 credentials in the [Google Cloud Console](https://console.cloud.google.com/):
