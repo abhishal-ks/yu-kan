@@ -36,6 +36,11 @@ type AnalysisResult = {
   };
 };
 
+type ConversationMessage = {
+  role: "user" | "assistant";
+  content: string;
+};
+
 type DashboardProps = {
   authenticated: boolean;
   authError?: string;
@@ -142,6 +147,12 @@ const authErrorMessages: Record<string, string> = {
   callback: "We couldn't finish Google sign-in. Please try again.",
 };
 
+const suggestedQuestions = [
+  "Which recent videos kept viewers watching the longest?",
+  "Which uploads gained the most subscribers?",
+  "What should I improve in my next video based on my recent analytics?",
+];
+
 function formatMetric(value: number | null, fractionDigits = 0) {
   if (value === null) return "—";
   return new Intl.NumberFormat("en", {
@@ -175,6 +186,10 @@ export default function Dashboard({ authenticated, authError }: DashboardProps) 
   const [channelProfileError, setChannelProfileError] = useState<string | null>(
     null,
   );
+  const [question, setQuestion] = useState("");
+  const [conversation, setConversation] = useState<ConversationMessage[]>([]);
+  const [asking, setAsking] = useState(false);
+  const [askError, setAskError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authenticated) return;
@@ -259,6 +274,70 @@ export default function Dashboard({ authenticated, authError }: DashboardProps) 
       );
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function askAboutAnalytics() {
+    const currentQuestion = question.trim();
+    if (!currentQuestion || asking) return;
+
+    setAsking(true);
+    setAskError(null);
+
+    try {
+      const response = await fetch("/api/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question: currentQuestion,
+          history: conversation.slice(-8).map((message) => ({
+            ...message,
+            content:
+              message.content.length > 3000
+                ? `${message.content.slice(0, 2997)}...`
+                : message.content,
+          })),
+        }),
+      });
+      const body: unknown = await response.json();
+
+      if (!response.ok) {
+        const message =
+          typeof body === "object" &&
+            body !== null &&
+            "error" in body &&
+            typeof body.error === "string"
+            ? body.error
+            : "We couldn't answer your question. Please try again.";
+        throw new Error(message);
+      }
+
+      if (
+        typeof body !== "object" ||
+        body === null ||
+        !("answer" in body) ||
+        typeof body.answer !== "string" ||
+        body.answer.trim().length === 0
+      ) {
+        throw new Error("The answer response was invalid. Please try again.");
+      }
+
+      const answer = body.answer;
+      const nextConversation: ConversationMessage[] = [
+        ...conversation,
+        { role: "user", content: currentQuestion },
+        { role: "assistant", content: answer },
+      ];
+      setConversation(nextConversation.slice(-10));
+      setQuestion("");
+    } catch (caughtError) {
+      setAskError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : "An unexpected error occurred. Please try again.",
+      );
+    } finally {
+      setAsking(false);
     }
   }
 
@@ -467,6 +546,122 @@ export default function Dashboard({ authenticated, authError }: DashboardProps) 
       </section>
 
       {result && <Results result={result} />}
+
+      {authenticated && (
+        <section
+          aria-labelledby="analytics-questions-heading"
+          className="mb-10 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+        >
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.14em] text-red-600">
+              Ask about your channel
+            </p>
+            <h2
+              id="analytics-questions-heading"
+              className="mt-1 text-xl font-semibold text-slate-950"
+            >
+              Follow up on your analytics
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Answers use your 10 most recent uploads and available metrics
+              from the last 90 days. Each question fetches your data securely.
+            </p>
+            <p className="mt-2 text-xs leading-5 text-slate-500">
+              Your question, recent conversation, and analytics are sent to
+              Gemini to generate an answer. Conversation history stays in this
+              page and is not saved by this app.
+            </p>
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            {suggestedQuestions.map((suggestion) => (
+              <button
+                key={suggestion}
+                type="button"
+                onClick={() => setQuestion(suggestion)}
+                disabled={asking}
+                className="rounded-full border border-slate-200 px-3 py-2 text-left text-sm text-slate-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-800 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
+
+          <form
+            className="mt-4 flex flex-col gap-3 sm:flex-row"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void askAboutAnalytics();
+            }}
+          >
+            <label className="sr-only" htmlFor="analytics-question">
+              Ask a question about your YouTube analytics
+            </label>
+            <input
+              id="analytics-question"
+              type="text"
+              value={question}
+              onChange={(event) => setQuestion(event.target.value)}
+              maxLength={1000}
+              placeholder="Ask a question about your recent videos…"
+              disabled={asking}
+              className="min-h-12 min-w-0 flex-1 rounded-xl border border-slate-300 px-4 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-red-500 focus:ring-2 focus:ring-red-100 disabled:bg-slate-50"
+            />
+            <button
+              type="submit"
+              disabled={asking || !question.trim()}
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {asking && <Spinner />}
+              {asking ? "Thinking…" : "Ask"}
+            </button>
+          </form>
+
+          {askError && (
+            <p
+              role="alert"
+              className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+            >
+              {askError}
+              {askError.toLowerCase().includes("sign in") && (
+                <>
+                  {" "}
+                  <a
+                    className="font-semibold underline underline-offset-2"
+                    href="/api/auth/login"
+                  >
+                    Reconnect Google
+                  </a>
+                </>
+              )}
+            </p>
+          )}
+
+          {conversation.length > 0 && (
+            <ol
+              aria-live="polite"
+              aria-label="Analytics conversation"
+              className="mt-6 space-y-4 border-t border-slate-100 pt-5"
+            >
+              {conversation.map((message, index) => (
+                <li
+                  key={`${index}-${message.role}`}
+                  className={
+                    message.role === "user"
+                      ? "ml-auto max-w-2xl rounded-2xl bg-slate-100 px-4 py-3 text-sm text-slate-800"
+                      : "max-w-3xl rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-700"
+                  }
+                >
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    {message.role === "user" ? "You" : "ViewPulse"}
+                  </p>
+                  <p className="whitespace-pre-wrap">{message.content}</p>
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
+      )}
 
       <footer className="flex flex-col gap-2 border-t border-slate-200 py-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
         <span>Independent insights for independent creators.</span>

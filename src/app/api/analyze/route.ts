@@ -204,10 +204,10 @@ export async function POST() {
 
     const videoResponse = videoIds.length
       ? await youtube.videos.list({
-          part: ["snippet", "contentDetails"],
-          id: videoIds,
-          maxResults: videoIds.length,
-        })
+        part: ["snippet", "contentDetails"],
+        id: videoIds,
+        maxResults: videoIds.length,
+      })
       : null;
 
     const dataVideos = new Map(
@@ -268,8 +268,8 @@ export async function POST() {
           : null;
       const watchTimeEfficiencyPercent =
         potentialWatchMinutes !== null &&
-        potentialWatchMinutes > 0 &&
-        metrics.estimatedMinutesWatched !== null
+          potentialWatchMinutes > 0 &&
+          metrics.estimatedMinutesWatched !== null
           ? (metrics.estimatedMinutesWatched / potentialWatchMinutes) * 100
           : null;
 
@@ -284,29 +284,29 @@ export async function POST() {
     if (videos.length > 0) {
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
       const result = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.8-flash",
         config: { responseMimeType: "application/json" },
         contents: [
           "You are a YouTube audience-retention and content-strategy analyst. " +
-            "Analyze only the supplied video-level analytics for the last 90 days. " +
-            "Return valid JSON with exactly these properties: retentionAnalysis " +
-            "(string), subscriberConversionAnalysis (string), " +
-            "watchTimeEfficiencyAnalysis (string), and scriptRecommendations " +
-            "(array of exactly 3 strings).\n\n" +
-            "For retentionAnalysis, identify videos with high views but low " +
-            "averageViewPercentage as possible hook/retention failures, while " +
-            "explaining that views are not click-through rate. CTR and impressions " +
-            "were not requested or supplied, so do not claim to measure CTR. " +
-            "For subscriberConversionAnalysis, compare subscribersGained per view " +
-            "only where views are greater than zero and identify high-conversion " +
-            "value content. For watchTimeEfficiencyAnalysis, interpret " +
-            "watchTimeEfficiencyPercent as estimatedMinutesWatched divided by " +
-            "(views multiplied by video length in minutes); compare it with " +
-            "averageViewPercentage and note that these measures may differ. " +
-            "Provide three deep structural recommendations for the user's next " +
-            "video scripts based on observed patterns. Do not invent causes or " +
-            "fill missing metrics; describe insufficient or missing data clearly.\n\n" +
-            JSON.stringify(videos),
+          "Analyze only the supplied video-level analytics for the last 90 days. " +
+          "Return valid JSON with exactly these properties: retentionAnalysis " +
+          "(string), subscriberConversionAnalysis (string), " +
+          "watchTimeEfficiencyAnalysis (string), and scriptRecommendations " +
+          "(array of exactly 3 strings).\n\n" +
+          "For retentionAnalysis, identify videos with high views but low " +
+          "averageViewPercentage as possible hook/retention failures, while " +
+          "explaining that views are not click-through rate. CTR and impressions " +
+          "were not requested or supplied, so do not claim to measure CTR. " +
+          "For subscriberConversionAnalysis, compare subscribersGained per view " +
+          "only where views are greater than zero and identify high-conversion " +
+          "value content. For watchTimeEfficiencyAnalysis, interpret " +
+          "watchTimeEfficiencyPercent as estimatedMinutesWatched divided by " +
+          "(views multiplied by video length in minutes); compare it with " +
+          "averageViewPercentage and note that these measures may differ. " +
+          "Provide three deep structural recommendations for the user's next " +
+          "video scripts based on observed patterns. Do not invent causes or " +
+          "fill missing metrics; describe insufficient or missing data clearly.\n\n" +
+          JSON.stringify(videos),
         ],
       });
 
