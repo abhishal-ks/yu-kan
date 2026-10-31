@@ -36,6 +36,8 @@ const analyticsMetrics = [
   "shares",
 ] as const;
 
+// Keep the request guardrails in one place so API clients cannot send oversized
+// payloads or long conversation histories that would waste tokens or trigger unexpected model behavior.
 const maxQuestionLength = 1000;
 const maxConversationMessages = 8;
 const maxUserMessageLength = 1000;
@@ -83,6 +85,8 @@ function parseConversationMessage(value: unknown): ConversationMessage | null {
   return { role: value.role, content: value.content.trim() };
 }
 
+// Validate the request body before using any user input in the model prompt.
+// This is a lightweight safety net that keeps prompt size predictable and avoids trusting malformed history objects.
 function parseRequestBody(
   value: unknown,
 ): { question: string; history: ConversationMessage[] } | null {
@@ -125,6 +129,8 @@ function parseRequestBody(
   };
 }
 
+// This route is intentionally strict about the shape and size of incoming requests.
+// Keeping user text and prior chat context bounded makes the LLM prompt more reliable and prevents abuse.
 export async function POST(request: Request) {
   const contentLength = Number(request.headers.get("content-length"));
   if (Number.isFinite(contentLength) && contentLength > maxRequestBytes) {
@@ -270,6 +276,8 @@ export async function POST(request: Request) {
       }),
     }));
 
+    // The model prompt is engineered to keep answers grounded in channel metrics and
+    // prevent untrusted user text from being treated as commands or system instructions.
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
     const result = await ai.models.generateContent({
       model: "gemini-3.8-flash",

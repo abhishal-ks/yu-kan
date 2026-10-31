@@ -35,6 +35,8 @@ type DeepAnalysis = {
   scriptRecommendations: string[];
 };
 
+// The analytics contract is intentionally kept in one place so the YouTube API
+// response rows, parsed metrics, and Gemini prompt stay aligned over time.
 const analyticsMetrics = [
   "views",
   "estimatedMinutesWatched",
@@ -116,6 +118,8 @@ function parseAnalyticsRow(row: unknown): [string, VideoMetrics] | null {
   return [row[0], metrics];
 }
 
+// Treat model output as untrusted data: validate the schema before using any string
+// from Gemini so malformed or partial responses cannot silently break the UI.
 function parseGeminiAnalysis(text: string): DeepAnalysis {
   const parsed: unknown = JSON.parse(text);
   if (
@@ -152,6 +156,8 @@ function getLast90Days() {
   };
 }
 
+// The route enforces the "signed-in channel + validated AI response" pattern:
+// verify Google auth, fetch only the required data, then parse and safe-guard model output before returning it.
 export async function POST() {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get(ACCESS_TOKEN_COOKIE)?.value;
