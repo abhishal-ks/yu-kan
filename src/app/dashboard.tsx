@@ -343,6 +343,7 @@ export default function Dashboard({ authenticated, authError }: DashboardProps) 
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-5 py-6 sm:px-8 lg:px-12">
+      {/* Keep channel identity and account actions together in the page header. */}
       <header className="flex items-center justify-between border-b border-slate-200 pb-5">
         <Link
           href="/"
@@ -408,6 +409,7 @@ export default function Dashboard({ authenticated, authError }: DashboardProps) 
         )}
       </header>
 
+      {/* Pair the primary sign-in or analysis action with a preview of the insights. */}
       <section className="grid flex-1 items-center gap-10 py-12 lg:grid-cols-[1fr_0.85fr] lg:py-16">
         <div className="max-w-2xl">
           <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-red-100 bg-red-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-red-700">
@@ -545,8 +547,10 @@ export default function Dashboard({ authenticated, authError }: DashboardProps) 
         </div>
       </section>
 
+      {/* Detailed results are available after a successful channel analysis. */}
       {result && <Results result={result} />}
 
+      {/* Keep analytics follow-up tools limited to connected channel owners. */}
       {authenticated && (
         <section
           aria-labelledby="analytics-questions-heading"
@@ -663,6 +667,7 @@ export default function Dashboard({ authenticated, authError }: DashboardProps) 
         </section>
       )}
 
+      {/* Summarize the product and its read-only data access at the page end. */}
       <footer className="flex flex-col gap-2 border-t border-slate-200 py-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
         <span>Independent insights for independent creators.</span>
         <span>Read-only access · Powered by YouTube and Gemini</span>
@@ -689,6 +694,7 @@ function Results({ result }: { result: AnalysisResult }) {
         </p>
       </div>
 
+      {/* Highlight the three main findings before showing per-video details. */}
       <div className="grid gap-4 lg:grid-cols-3">
         <AnalysisCard
           label="Retention patterns"
@@ -707,6 +713,7 @@ function Results({ result }: { result: AnalysisResult }) {
         />
       </div>
 
+      {/* The wide table scrolls horizontally on smaller screens to preserve columns. */}
       <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-200 px-5 py-4">
           <h3 className="font-semibold text-slate-950">Video metrics</h3>
@@ -787,6 +794,7 @@ function Results({ result }: { result: AnalysisResult }) {
         )}
       </section>
 
+      {/* Present the generated script ideas as a short, ordered action list. */}
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
         <h3 className="font-semibold text-slate-950">
           Three structural ideas for your next scripts
