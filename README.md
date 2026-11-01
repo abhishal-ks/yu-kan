@@ -63,3 +63,15 @@ Visit [http://localhost:3000](http://localhost:3000) and sign in with Google. Af
 - `POST /api/auth/logout` clears the local OAuth cookies.
 
 The report includes a watch-time efficiency estimate (watch minutes divided by views times video duration). The requested report metrics do not include impressions or click-through rate (CTR), so the analysis does not infer either from views. Analytics values may be absent for videos without report data in the selected period. Follow-up questions use the same 10-upload and 90-day limits; recent conversation messages are sent only as bounded context and are not treated as a source of analytics facts. Questions, recent conversation context, and analytics are sent to Gemini for answers; conversation history is held in page memory and is not saved by this app.
+
+## Post-MVP roadmap
+
+These are planned extensions and are not part of the current implementation:
+
+1. **Build an AI agent harness** that manages conversation history and a catalog of tools the agent can use to answer creator questions.
+2. **Add video understanding** so creators can ask questions about a channel's actual video content. A `see_video` tool would let Gemini inspect a video and answer based on what it sees.
+3. **Add channel and video data tools** to the catalog:
+   - `fetch_channel_metadata` for channel details.
+   - `fetch_video_metadata` for video details such as title, description, like count, and comments.
+   - `get_video_analytics` for video performance metrics.
+   - `see_video` for Gemini-powered understanding of the video's content.
