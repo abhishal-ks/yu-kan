@@ -4,6 +4,10 @@ ViewPulse connects a YouTube channel with read-only Google OAuth access, retriev
 
 ![ViewPulse dashboard](./public/dashboard.png)
 
+## Deployed app
+
+[Open ViewPulse](https://yu-kan.vercel.app/)
+
 ## Design and architecture
 
 The browser renders the dashboard and makes same-origin requests to Next.js API routes. OAuth tokens remain in HTTP-only cookies; the server uses them to fetch YouTube data and calls Gemini for analysis and answers.
