@@ -16,6 +16,9 @@ export const metadata: Metadata = {
   title: "ViewPulse | YouTube Channel Insights",
   description:
     "Understand your recent YouTube uploads with real channel data and AI-powered recommendations.",
+  openGraph: {
+    images: ["/landing-og.png"],
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
