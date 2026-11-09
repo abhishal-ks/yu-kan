@@ -8,6 +8,15 @@ YuKan connects a YouTube channel with read-only Google OAuth access, retrieves i
 
 [Open YuKan](https://yu-kan.vercel.app/)
 
+## Public policies
+
+- [Privacy Policy](https://yu-kan.vercel.app/privacy)
+- [Terms of Service](https://yu-kan.vercel.app/terms)
+
+Use these public HTTPS URLs in the Google OAuth consent configuration. Keep the
+published policy details consistent with the production app and its actual data
+handling.
+
 ## Design and architecture
 
 The browser renders the dashboard and makes same-origin requests to Next.js API routes. OAuth tokens remain in HTTP-only cookies; the server uses them to fetch YouTube data and calls Gemini for analysis and answers.

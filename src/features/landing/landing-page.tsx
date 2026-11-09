@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import SiteFooter from "@/components/site-footer";
 
 type LandingPageProps = {
   authenticated: boolean;
@@ -84,7 +85,8 @@ export default function LandingPage({
             </a>
           )}
           <p className="mt-4 text-sm text-slate-500">
-            Read-only access. Your data is used to generate your analysis.
+            Read-only access. Channel analytics and questions are sent to
+            Google Gemini only when you request analysis or answers.
           </p>
         </div>
 
@@ -131,10 +133,7 @@ export default function LandingPage({
         </div>
       </section>
 
-      <footer className="flex flex-col gap-2 border-t border-slate-200 py-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-        <span>Independent insights for independent creators.</span>
-        <span>Read-only access · Powered by YouTube and Gemini</span>
-      </footer>
+      <SiteFooter />
     </main>
   );
 }
