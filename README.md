@@ -1,12 +1,12 @@
-# ViewPulse
+# YuKan
 
-ViewPulse connects a YouTube channel with read-only Google OAuth access, retrieves its 10 most recent uploads and their last 90 days of video-level analytics, and generates a performance breakdown with Gemini.
+YuKan connects a YouTube channel with read-only Google OAuth access, retrieves its 10 most recent uploads and their last 90 days of video-level analytics, and generates a performance breakdown with Gemini. Its name combines “You” from YouTube with the Japanese word *kan* (pipe), reflecting the pipeline from channel analytics to actionable insights.
 
-![ViewPulse dashboard](./public/dashboard.png)
+![YuKan dashboard](./public/dashboard.png)
 
 ## Deployed app
 
-[Open ViewPulse](https://yu-kan.vercel.app/)
+[Open YuKan](https://yu-kan.vercel.app/)
 
 ## Design and architecture
 
@@ -55,7 +55,7 @@ Never expose these values through `NEXT_PUBLIC_` variables or commit `.env.local
 npm run dev
 ```
 
-Visit [http://localhost:3000](http://localhost:3000) and sign in with Google. After connecting, ViewPulse opens the channel workspace at `/dashboard`; run an analysis there to see the report and ask questions grounded in its analytics. The access and refresh tokens are stored in HTTP-only, same-site cookies and are never sent to client-side JavaScript. If you connected before the YouTube Analytics scope was added, disconnect and sign in again to grant it.
+Visit [http://localhost:3000](http://localhost:3000) and sign in with Google. After connecting, YuKan opens the channel workspace at `/dashboard`; run an analysis there to see the report and ask questions grounded in its analytics. The access and refresh tokens are stored in HTTP-only, same-site cookies and are never sent to client-side JavaScript. If you connected before the YouTube Analytics scope was added, disconnect and sign in again to grant it.
 
 ## API
 

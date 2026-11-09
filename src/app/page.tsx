@@ -18,7 +18,7 @@ export default function Home({ searchParams }: HomeProps) {
           aria-busy="true"
           className="min-h-screen bg-slate-50 px-5 py-10 text-slate-500"
         >
-          Loading ViewPulse…
+          Loading YuKan…
         </main>
       }
     >

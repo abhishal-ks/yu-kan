@@ -152,7 +152,7 @@ export default function AnalyticsChat() {
             }
           >
             <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
-              {message.role === "user" ? "You" : "ViewPulse"}
+              {message.role === "user" ? "You" : "YuKan"}
             </p>
             <p className="whitespace-pre-wrap">{message.content}</p>
           </li>
@@ -169,7 +169,7 @@ export default function AnalyticsChat() {
               role="status"
               className="max-w-3xl rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600"
             >
-              ViewPulse is reviewing your analytics…
+              YuKan is reviewing your analytics…
             </li>
           </>
         )}

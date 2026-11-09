@@ -214,13 +214,15 @@ export default function DashboardWorkspace() {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-5 py-6 sm:px-8 lg:px-12">
       <header className="flex items-center justify-between border-b border-slate-200 pb-5">
-        <Link href="/" className="flex items-center gap-3" aria-label="ViewPulse home">
-          <span className="grid size-10 place-items-center rounded-xl bg-red-600 text-lg font-bold text-white">
-            V
-          </span>
-          <span className="text-lg font-semibold tracking-tight text-slate-950">
-            ViewPulse
-          </span>
+        <Link href="/" className="flex items-center" aria-label="YuKan home">
+          <Image
+            src="/yukan-logo.svg"
+            alt=""
+            width={216}
+            height={56}
+            priority
+            className="h-10 w-auto"
+          />
         </Link>
         <div className="flex items-center gap-3">
           {channelProfileLoading && (
