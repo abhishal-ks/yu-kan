@@ -13,6 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://yu-kan.vercel.app"),
   title: "ViewPulse | YouTube Channel Insights",
   description:
     "Understand your recent YouTube uploads with real channel data and AI-powered recommendations.",
